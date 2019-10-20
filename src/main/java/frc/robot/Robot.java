@@ -23,26 +23,30 @@ import frc.subsystems.SwerveDrive;;
  * project.
  */
 public class Robot extends TimedRobot {
-  public static final boolean PID_TUNING = true;
+  public static final boolean PID_TUNING = false;
 
   public SwerveDrive drivetrain;
   private XboxController gamepad;
 
   public Robot() {
-    this.gamepad = new XboxController(0);
-    this.drivetrain = new SwerveDrive();
   }
 
   @Override
   public void robotInit() {
+    this.gamepad = new XboxController(0);
+    this.drivetrain = new SwerveDrive();
+    this.drivetrain.getModule(0).printConstants();
     if(PID_TUNING) {
       SmartDashboard.putNumber("P Gain", this.drivetrain.getModule(0).getAngleKP());
       SmartDashboard.putNumber("I Gain", this.drivetrain.getModule(0).getAngleKI());
       SmartDashboard.putNumber("D Gain", this.drivetrain.getModule(0).getAngleKD());
       SmartDashboard.putNumber("Feed Forward", this.drivetrain.getModule(0).getAngleKF());
-      SmartDashboard.putNumber("Max Output", this.drivetrain.getModule(0).getAngleMinOutput());
-      SmartDashboard.putNumber("Min Output", this.drivetrain.getModule(0).getAngleMaxOutput());
+      SmartDashboard.putNumber("Max Output", this.drivetrain.getModule(0).getAngleMaxOutput());
+      SmartDashboard.putNumber("Min Output", this.drivetrain.getModule(0).getAngleMinOutput());
       SmartDashboard.putNumber("Set Target", 0);
+      SmartDashboard.putNumber("Error", 0);
+      SmartDashboard.putNumber("TargetRad", this.drivetrain.getModule(0).getTargetRadians());
+      SmartDashboard.putNumber("Encoder Position", this.drivetrain.getModule(0).getEncoderValue());
     }
   }
 
@@ -59,6 +63,11 @@ public class Robot extends TimedRobot {
   }
 
   @Override
+  public void teleopInit() {
+    this.drivetrain.getModule(0).printConstants();
+  }
+
+  @Override
   public void teleopPeriodic() {
     if(PID_TUNING) {
       double p = SmartDashboard.getNumber("P Gain", this.drivetrain.getModule(0).getAngleKP());
@@ -69,12 +78,25 @@ public class Robot extends TimedRobot {
       double min = SmartDashboard.getNumber("Min Output", this.drivetrain.getModule(0).getAngleMinOutput());
       this.drivetrain.getModule(0).updateAnglePIDF(p, i, d, ff, min, max);
       this.drivetrain.getModule(0).setAngleDeg(SmartDashboard.getNumber("Set Target", 0));
+      SmartDashboard.putNumber("Error", this.drivetrain.getModule(0).getAngleError());
+      SmartDashboard.putNumber("TargetRad", this.drivetrain.getModule(0).getTargetRadians());
+      SmartDashboard.putNumber("Encoder Position", this.drivetrain.getModule(0).getEncoderValue());
     } else {
       double x,y,r;
-      x = this.gamepad.getRawAxis(1);
-      y = this.gamepad.getRawAxis(2);
+      x = this.gamepad.getRawAxis(0);
+      y = this.gamepad.getRawAxis(1)*-1;
       r = this.gamepad.getRawAxis(4);
+      if(Math.abs(x) < 0.1) x = 0;
+      if(Math.abs(y) < 0.1) y = 0;
+      if(Math.abs(r) < 0.1) r = 0;
+      if(gamepad.getBButton()) {
+        this.drivetrain.drive(x,y,r,false);
+      }
       this.drivetrain.drive(x,y,r);
+    }
+    if(gamepad.getAButtonPressed()) {
+      this.drivetrain.getModule(0).updateAnglePIDF(1.5, 0, 1.0, 0, -0.8, 0.8);
+      this.drivetrain.getModule(0).printConstants();
     }
   }
 

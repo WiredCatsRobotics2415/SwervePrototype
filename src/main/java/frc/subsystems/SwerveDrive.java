@@ -18,7 +18,7 @@ public class SwerveDrive {
 
     public SwerveDrive() {
         this.modules = new SwerveModule[1];
-        this.modules[0] = new SwerveModule(0, 1);
+        this.modules[0] = new SwerveModule(1, 2);
     }
 
     public SwerveDrive(double[][] modulePositions) {
@@ -33,6 +33,12 @@ public class SwerveDrive {
     public void drive(double x, double y, double r) {
         for(int i = 0; i < modules.length; i++) {
             modules[i].setVector(Vector2D.addVectors(new Vector2D(x,y), getTurnAngleVector(r, modulePositions[i][0], modulePositions[i][1])));
+        }
+    }
+
+    public void drive(double x, double y, double r, boolean driving) {
+        for(int i = 0; i < modules.length; i++) {
+            modules[i].setVector(Vector2D.addVectors(new Vector2D(x,y), getTurnAngleVector(r, modulePositions[i][0], modulePositions[i][1])), driving);
         }
     }
 
