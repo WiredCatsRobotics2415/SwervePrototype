@@ -18,6 +18,7 @@ import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 
 import frc.util.Vector2D;
+import frc.util.Position;
 
 public class SwerveModule {
     public static final double ANGLE_ENCODER_CONV = (9.0*18)/(34*96)*Math.PI*2;
@@ -33,7 +34,9 @@ public class SwerveModule {
     private CANPIDController driveController, angleController;
     private CANEncoder angleEncoder;
 
-    public SwerveModule(int angleMotorId, int driveMotorId) {
+    public final Position modulePosition;
+
+    public SwerveModule(int angleMotorId, int driveMotorId, Position modulePosition) {
         this.angleMotor = new CANSparkMax(angleMotorId, MotorType.kBrushless);
         this.driveMotor = new CANSparkMax(driveMotorId, MotorType.kBrushless);
         this.angleMotor.restoreFactoryDefaults();
@@ -57,6 +60,8 @@ public class SwerveModule {
         this.driveController.setD(DRIVE_KD);
         this.driveController.setFF(DRIVE_KF);
         this.driveController.setOutputRange(driveMinOutput,driveMaxOutput);
+
+        this.modulePosition = modulePosition;
     }
 
     public void setVector(Vector2D vector, boolean driving) {

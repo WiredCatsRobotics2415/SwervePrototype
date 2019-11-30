@@ -8,51 +8,39 @@
 package frc.subsystems;
 
 import frc.util.Vector2D;
-
+import frc.robot.RobotMap;
 /**
  * Add your docs here.
  */
 public class SwerveDrive {
-    private SwerveModule[] modules;
-    private double[][] modulePositions = {{1,1},{-1,1},{-1,-1},{1,-1}};
+    private SwerveModule frontRightModule, frontLeftModule, backRightModule, backLeftModule;
 
     public SwerveDrive() {
-        this.modules = new SwerveModule[1];
-        this.modules[0] = new SwerveModule(1, 2);
-    }
-
-    public SwerveDrive(double[][] modulePositions) {
-        this.modules = new SwerveModule[1];
-        this.modules[0] = new SwerveModule(0, 1);
-        this.modulePositions = new double[modulePositions.length][];
-        for(int i = 0; i < modulePositions.length; i++) {
-            this.modulePositions[i] = modulePositions[i].clone();
-        }
+        this.frontRightModule = new SwerveModule(RobotMap.FRONT_RIGHT_AZIMUTH, RobotMap.FRONT_RIGHT_DRIVE, RobotMap.FRONT_RIGHT_MODULE_POSITION);
+        this.frontLeftModule = new SwerveModule(RobotMap.FRONT_LEFT_AZIMUTH, RobotMap.FRONT_LEFT_DRIVE, RobotMap.FRONT_LEFT_MODULE_POSITION);
+        this.backRightModule = new SwerveModule(RobotMap.BACK_RIGHT_AZIMUTH, RobotMap.BACK_RIGHT_DRIVE, RobotMap.BACK_RIGHT_MODULE_POSITION);
+        this.backLeftModule = new SwerveModule(RobotMap.BACK_LEFT_AZIMUTH, RobotMap.BACK_LEFT_DRIVE, RobotMap.BACK_LEFT_MODULE_POSITION);
     }
 
     public void drive(double x, double y, double r) {
-        for(int i = 0; i < modules.length; i++) {
-            modules[i].setVector(Vector2D.addVectors(new Vector2D(x,y), getTurnAngleVector(r, modulePositions[i][0], modulePositions[i][1])));
-        }
+        Vector2D strafVector = new Vector2D(x,y);
+        frontRightModule.setVector(getModuleVector(strafVector, r, frontRightModule));
+        frontLeftModule.setVector(getModuleVector(strafVector, r, frontLeftModule));
+        backRightModule.setVector(getModuleVector(strafVector, r, backRightModule));
+        backLeftModule.setVector(getModuleVector(strafVector, r, backLeftModule));
     }
 
-    public void drive(double x, double y, double r, boolean driving) {
-        for(int i = 0; i < modules.length; i++) {
-            modules[i].setVector(Vector2D.addVectors(new Vector2D(x,y), getTurnAngleVector(r, modulePositions[i][0], modulePositions[i][1])), driving);
-        }
+    private Vector2D getModuleVector(Vector2D strafVector, double r, SwerveModule module) {
+        return Vector2D.addVectors(strafVector, getTurnAngleVector(r, module));
     }
 
-    private Vector2D getTurnAngleVector(double r, double moduleX, double moduleY) {
+    private Vector2D getTurnAngleVector(double r, SwerveModule module) {
         double angle;
-        if(moduleX >= 0) {
-            angle = Math.atan2(moduleY, moduleX)-Math.PI/2;
+        if(module.modulePosition.x >= 0) {
+            angle = Math.atan2(module.modulePosition.y, module.modulePosition.x)-Math.PI/2;
         } else {
-            angle = Math.atan2(moduleY, moduleX)+Math.PI/2;
+            angle = Math.atan2(module.modulePosition.y, module.modulePosition.x)+Math.PI/2;
         }
         return Vector2D.fromAngle(r, angle);
-    }
-
-    public SwerveModule getModule(int index) {
-        return this.modules[index];
     }
 }
