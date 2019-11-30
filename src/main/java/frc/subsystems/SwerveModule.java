@@ -64,20 +64,6 @@ public class SwerveModule {
         this.modulePosition = modulePosition;
     }
 
-    public void setVector(Vector2D vector, boolean driving) {
-        boolean revirsed = true;
-        if(vector.getLength() != 0) {
-            revirsed = this.setAngle(vector.getAngle());
-        }
-        if(driving) {
-            if(revirsed) {
-                this.setSpeed(vector.getLength()*-1);
-            } else {
-                this.setSpeed(vector.getLength());
-            }
-        }
-    }
-
     public void setVector(Vector2D vector) {
         boolean revirsed = true;
         if(vector.getLength() != 0) {
